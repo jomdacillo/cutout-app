@@ -1,0 +1,60 @@
+.wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.pill {
+  border-radius: var(--r-pill);
+  padding: 8px 18px;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.2px;
+  border: 1px solid var(--border);
+  background: var(--surface-alt);
+  color: var(--muted);
+  transition: all var(--t-slow) var(--ease);
+}
+
+.pill.loading {
+  border-color: rgba(108, 99, 255, 0.3);
+  color: #a89bff;
+  background: rgba(108, 99, 255, 0.08);
+}
+
+.pill.ready {
+  border-color: rgba(74, 222, 128, 0.3);
+  color: #86efac;
+  background: var(--success-dim);
+}
+
+.pill.error {
+  border-color: rgba(248, 113, 113, 0.35);
+  color: #fca5a5;
+  background: rgba(248, 113, 113, 0.08);
+}
+
+.progressWrap {
+  width: 200px;
+  height: 3px;
+  background: var(--border);
+  border-radius: var(--r-pill);
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  border-radius: var(--r-pill);
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  transition: width 0.4s var(--ease);
+}
+
+.errorNote {
+  font-size: 11px;
+  color: var(--error);
+  text-align: center;
+  max-width: 360px;
+  line-height: 1.5;
+}
