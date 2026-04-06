@@ -8,7 +8,53 @@ import { useEffect, useRef, useState, useCallback } from 'react'
 import RmbgWorker from '../worker/rmbg.worker.js?worker'
 
 /**
- * Apply the segmentation mask to the original image on a canvas.
+ * Bilinear interpolation sample from a grayscale mask.
+ * Gives smooth sub-pixel alpha values when upscaling the mask
+ * to the full original image resolution.
+ */
+function sampleMaskBilinear(mask, u, v) {
+  // u, v are floating-point coordinates in mask space
+  const x0 = Math.floor(u)
+  const y0 = Math.floor(v)
+  const x1 = Math.min(x0 + 1, mask.width - 1)
+  const y1 = Math.min(y0 + 1, mask.height - 1)
+
+  const fx = u - x0
+  const fy = v - y0
+
+  const w = mask.width
+  const m = mask.data
+
+  const tl = m[y0 * w + x0]
+  const tr = m[y0 * w + x1]
+  const bl = m[y1 * w + x0]
+  const br = m[y1 * w + x1]
+
+  // Bilinear blend
+  return (
+    tl * (1 - fx) * (1 - fy) +
+    tr * fx       * (1 - fy) +
+    bl * (1 - fx) * fy       +
+    br * fx       * fy
+  )
+}
+
+/**
+ * Smooth a raw alpha value with a soft threshold curve.
+ * Pushes mid-range values toward 0 or 255, softening hard edges
+ * while preserving genuine transparency at the boundary.
+ */
+function refineAlpha(raw) {
+  // Normalize to 0–1
+  const a = raw / 255
+  // Smooth-step: sharpens edges but keeps anti-aliasing
+  const smoothed = a * a * (3 - 2 * a)
+  return Math.round(smoothed * 255)
+}
+
+/**
+ * Apply the segmentation mask to the original full-resolution image.
+ * Uses bilinear interpolation + alpha refinement for crisp, high-quality edges.
  * Returns a blob URL of the resulting transparent PNG.
  */
 function applyMaskToImage(originalDataUrl, mask) {
@@ -16,35 +62,43 @@ function applyMaskToImage(originalDataUrl, mask) {
     const img = new Image()
 
     img.onload = () => {
+      const W = img.naturalWidth
+      const H = img.naturalHeight
+
       const canvas = document.createElement('canvas')
-      canvas.width  = img.naturalWidth
-      canvas.height = img.naturalHeight
+      canvas.width  = W
+      canvas.height = H
 
       const ctx = canvas.getContext('2d')
+      // Draw original at full resolution
       ctx.drawImage(img, 0, 0)
 
-      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
+      const imageData = ctx.getImageData(0, 0, W, H)
       const pixels    = imageData.data
 
-      // The mask may have different dimensions — scale if needed
-      const scaleX = mask.width  / canvas.width
-      const scaleY = mask.height / canvas.height
+      // Scale factors: map image pixel → mask coordinate
+      const scaleX = (mask.width  - 1) / (W - 1 || 1)
+      const scaleY = (mask.height - 1) / (H - 1 || 1)
 
-      for (let y = 0; y < canvas.height; y++) {
-        for (let x = 0; x < canvas.width; x++) {
-          const pixelIdx = (y * canvas.width + x) * 4
+      for (let y = 0; y < H; y++) {
+        for (let x = 0; x < W; x++) {
+          const pixelIdx = (y * W + x) * 4
 
-          // Sample corresponding mask pixel
-          const mx = Math.round(x * scaleX)
-          const my = Math.round(y * scaleY)
-          const maskIdx = my * mask.width + mx
+          // Map to fractional mask coordinates
+          const mu = x * scaleX
+          const mv = y * scaleY
 
-          pixels[pixelIdx + 3] = mask.data[maskIdx]
+          // High-quality bilinear sample
+          const raw = sampleMaskBilinear(mask, mu, mv)
+
+          // Apply smooth-step refinement for cleaner edges
+          pixels[pixelIdx + 3] = refineAlpha(raw)
         }
       }
 
       ctx.putImageData(imageData, 0, 0)
 
+      // Export at maximum quality PNG (lossless, full resolution)
       canvas.toBlob(
         (blob) => {
           if (blob) resolve(URL.createObjectURL(blob))
