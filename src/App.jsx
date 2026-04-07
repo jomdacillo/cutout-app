@@ -13,7 +13,7 @@ import AdSlot               from './components/AdSlot.jsx'
 import ModelLoadingBanner   from './components/ModelLoadingBanner.jsx'
 import PrivacyPolicy        from './pages/PrivacyPolicy.jsx'
 import useRmbgWorker        from './hooks/useRmbgWorker.js'
-import { fileToDataUrl, formatSize, download, isImage } from './utils/image.js'
+import { fileToObjectUrl, fileToArrayBuffer, formatSize, download, isImage } from './utils/image.js'
 import styles from './App.module.css'
 
 const isPrivacyPage = () =>
@@ -21,33 +21,47 @@ const isPrivacyPage = () =>
 
 export default function App() {
   if (isPrivacyPage()) return <PrivacyPolicy />
-  const [dataUrl,   setDataUrl]   = useState(null)
-  const [imageName, setImageName] = useState(null)
-  const [imageSize, setImageSize] = useState(null)
-  const [result,    setResult]    = useState(null)
-  const [error,     setError]     = useState(null)
-  const [toast,     setToast]     = useState(null)
-  const dataUrlRef = useRef(null)
+
+  // previewUrl — cheap object URL, used only for <img> display
+  // fileRef    — holds the original File for arrayBuffer transfer to worker
+  const [previewUrl, setPreviewUrl] = useState(null)
+  const [imageName,  setImageName]  = useState(null)
+  const [imageSize,  setImageSize]  = useState(null)
+  const [result,     setResult]     = useState(null)
+  const [error,      setError]      = useState(null)
+  const [toast,      setToast]      = useState(null)
+  const fileRef    = useRef(null)   // raw File — no encoding
   const toolRef    = useRef(null)
+  const prevUrlRef = useRef(null)   // track for revoke
 
   const { state, progress, device, error: modelError, removeBackground, isProcessing } = useRmbgWorker()
 
-  const handleFile = useCallback(async (file) => {
+  const handleFile = useCallback((file) => {
     if (!isImage(file)) return
-    setError(null); setResult(null)
+    setError(null)
+    setResult(null)
     setImageName(file.name)
     setImageSize(formatSize(file.size))
 
-    const du = await fileToDataUrl(file)
-    setDataUrl(du)
-    dataUrlRef.current = du
+    // Revoke previous preview URL to free memory
+    if (prevUrlRef.current) URL.revokeObjectURL(prevUrlRef.current)
+
+    // createObjectURL is instant — no base64, no encoding, no memory spike
+    const objUrl = fileToObjectUrl(file)
+    prevUrlRef.current = objUrl
+    setPreviewUrl(objUrl)
+
+    // Store raw file ref — worker will read it as ArrayBuffer when needed
+    fileRef.current = file
   }, [])
 
   const handleProcess = useCallback(async () => {
-    if (!dataUrlRef.current) return
+    if (!fileRef.current) return
     setError(null)
     try {
-      const url = await removeBackground(dataUrlRef.current)
+      // Read as ArrayBuffer only when processing — transferable to worker
+      const buf = await fileToArrayBuffer(fileRef.current)
+      const url = await removeBackground(buf, fileRef.current.type)
       setResult(url)
     } catch (e) {
       setError(e.message || 'Processing failed — please try again.')
@@ -55,9 +69,11 @@ export default function App() {
   }, [removeBackground])
 
   const handleClear = useCallback(() => {
-    setDataUrl(null); dataUrlRef.current = null
+    if (prevUrlRef.current) { URL.revokeObjectURL(prevUrlRef.current); prevUrlRef.current = null }
+    setPreviewUrl(null)
+    fileRef.current = null
     setImageName(null); setImageSize(null)
-    setResult(null); setError(null)
+    setResult(null);    setError(null)
   }, [])
 
   const handleDownload = useCallback(() => {
@@ -97,7 +113,8 @@ export default function App() {
         {/* Main tool */}
         <div ref={toolRef}>
           <ToolSection
-            dataUrl={dataUrl}
+            dataUrl={previewUrl}
+            hasImage={!!previewUrl}
             imageName={imageName}
             imageSize={imageSize}
             result={result}

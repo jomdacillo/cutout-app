@@ -52,14 +52,15 @@ export default function useRmbgWorker() {
     return () => { w.terminate(); workerRef.current = null }
   }, [])
 
-  const removeBackground = useCallback((imageDataUrl) => new Promise((resolve, reject) => {
+  const removeBackground = useCallback((imageBuf, imageType) => new Promise((resolve, reject) => {
     if (!workerRef.current || state !== MODEL_STATE.READY) {
       reject(new Error('Not ready'))
       return
     }
     inflightRef.current = { resolve, reject }
     setState(MODEL_STATE.PROCESSING)
-    workerRef.current.postMessage({ type: 'run', imageDataUrl })
+    // Transfer ArrayBuffer — moves memory to worker, zero copy on main thread
+    workerRef.current.postMessage({ type: 'run', imageBuf, imageType }, [imageBuf])
   }), [state])
 
   return {

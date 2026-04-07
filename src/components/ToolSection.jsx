@@ -5,7 +5,7 @@ import { MODEL_STATE } from '../hooks/useRmbgWorker'
 import styles from './ToolSection.module.css'
 
 export default function ToolSection({
-  dataUrl, imageName, imageSize, result,
+  dataUrl, hasImage, imageName, imageSize, result,
   state, onFile, onProcess, onClear, onDownload, onCopy, error,
 }) {
   const [dragging,  setDragging]  = useState(false)
