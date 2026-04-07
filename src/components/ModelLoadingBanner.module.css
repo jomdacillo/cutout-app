@@ -1,0 +1,186 @@
+/* ── Banner container ──────────────────────────────────────────────────────── */
+.banner {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 500;
+
+  display: flex;
+  align-items: center;
+  gap: 14px;
+
+  width: min(560px, calc(100vw - 32px));
+  padding: 14px 16px;
+
+  background: var(--surface);
+  border: 1px solid var(--border-2);
+  border-radius: var(--r-xl);
+  box-shadow:
+    0 4px 6px rgba(0,0,0,.04),
+    0 10px 32px rgba(0,0,0,.1);
+
+  animation: slideUp .35s cubic-bezier(.34,1.3,.64,1) both;
+  transition:
+    border-color .4s var(--ease),
+    box-shadow   .4s var(--ease);
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateX(-50%) translateY(18px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+/* ── State variants ────────────────────────────────────────────────────────── */
+.bannerReady {
+  border-color: rgba(16,185,129,.35);
+  box-shadow:
+    0 4px 6px rgba(0,0,0,.04),
+    0 10px 32px rgba(16,185,129,.12);
+}
+
+.bannerError {
+  border-color: rgba(239,68,68,.3);
+  box-shadow:
+    0 4px 6px rgba(0,0,0,.04),
+    0 10px 32px rgba(239,68,68,.1);
+}
+
+/* ── Icon ──────────────────────────────────────────────────────────────────── */
+.iconWrap {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: rgba(0,150,199,.08);
+  border: 1px solid rgba(0,150,199,.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background .4s, border-color .4s;
+}
+
+.bannerReady .iconWrap {
+  background: rgba(16,185,129,.1);
+  border-color: rgba(16,185,129,.25);
+}
+
+.bannerError .iconWrap {
+  background: rgba(239,68,68,.08);
+  border-color: rgba(239,68,68,.2);
+}
+
+.spinner {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2.5px solid rgba(0,150,199,.2);
+  border-top-color: var(--blue-green);
+  animation: spin .7s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.iconReady { color: var(--green); }
+.iconError { color: var(--red); }
+
+/* ── Body ──────────────────────────────────────────────────────────────────── */
+.body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.textRow {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+}
+
+.sub {
+  font-size: 11px;
+  color: var(--muted);
+  font-weight: 400;
+}
+
+.subError {
+  font-size: 11px;
+  color: var(--red);
+}
+
+/* ── Progress track ────────────────────────────────────────────────────────── */
+.track {
+  width: 100%;
+  height: 4px;
+  background: var(--border);
+  border-radius: var(--r-pill);
+  overflow: hidden;
+}
+
+.fill {
+  height: 100%;
+  border-radius: var(--r-pill);
+  background: linear-gradient(90deg, var(--bright-teal-blue), var(--turquoise-surf));
+  transition: width .6s var(--ease);
+}
+
+.fillReady {
+  background: linear-gradient(90deg, var(--green), #22c55e);
+  transition: width .4s var(--ease), background .4s;
+}
+
+/* ── Right side ────────────────────────────────────────────────────────────── */
+.right {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+}
+
+.cacheNote {
+  font-size: 11px;
+  color: var(--muted);
+  white-space: nowrap;
+  text-align: right;
+  line-height: 1.4;
+}
+
+.dismiss {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--fast);
+  font-family: var(--font);
+}
+.dismiss:hover {
+  background: var(--surface-2);
+  color: var(--text);
+  border-color: var(--border-2);
+}
+
+/* ── Responsive ────────────────────────────────────────────────────────────── */
+@media (max-width: 480px) {
+  .banner {
+    bottom: 16px;
+    padding: 12px 14px;
+    gap: 10px;
+  }
+  .cacheNote { display: none; }
+  .title { font-size: 12px; }
+}

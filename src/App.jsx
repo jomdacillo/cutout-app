@@ -1,26 +1,25 @@
 import { useState, useCallback, useRef } from 'react'
-import Header          from './components/Header.jsx'
-import Hero            from './components/Hero.jsx'
-import ToolSection     from './components/ToolSection.jsx'
-import FeaturesSection from './components/FeaturesSection.jsx'
-import HowItWorks      from './components/HowItWorks.jsx'
-import UseCases        from './components/UseCases.jsx'
-import FAQ             from './components/FAQ.jsx'
-import CtaBanner       from './components/CtaBanner.jsx'
-import Footer          from './components/Footer.jsx'
-import Toast           from './components/Toast.jsx'
-import AdSlot          from './components/AdSlot.jsx'
-import PrivacyPolicy   from './pages/PrivacyPolicy.jsx'
-import useRmbgWorker   from './hooks/useRmbgWorker.js'
+import Header               from './components/Header.jsx'
+import Hero                 from './components/Hero.jsx'
+import ToolSection          from './components/ToolSection.jsx'
+import FeaturesSection      from './components/FeaturesSection.jsx'
+import HowItWorks           from './components/HowItWorks.jsx'
+import UseCases             from './components/UseCases.jsx'
+import FAQ                  from './components/FAQ.jsx'
+import CtaBanner            from './components/CtaBanner.jsx'
+import Footer               from './components/Footer.jsx'
+import Toast                from './components/Toast.jsx'
+import AdSlot               from './components/AdSlot.jsx'
+import ModelLoadingBanner   from './components/ModelLoadingBanner.jsx'
+import PrivacyPolicy        from './pages/PrivacyPolicy.jsx'
+import useRmbgWorker        from './hooks/useRmbgWorker.js'
 import { fileToDataUrl, formatSize, download, isImage } from './utils/image.js'
 import styles from './App.module.css'
 
-// Simple client-side route — reads current URL path
 const isPrivacyPage = () =>
   window.location.pathname.replace(/\/$/, '') === '/privacy'
 
 export default function App() {
-  // Route to privacy page without any library
   if (isPrivacyPage()) return <PrivacyPolicy />
   const [dataUrl,   setDataUrl]   = useState(null)
   const [imageName, setImageName] = useState(null)
@@ -38,6 +37,7 @@ export default function App() {
     setError(null); setResult(null)
     setImageName(file.name)
     setImageSize(formatSize(file.size))
+
     const du = await fileToDataUrl(file)
     setDataUrl(du)
     dataUrlRef.current = du
@@ -86,13 +86,8 @@ export default function App() {
       <Header device={device} onTryFree={scrollToTool} />
 
       <main>
-        {/* Hero section */}
-        <Hero
-          state={state}
-          progress={progress}
-          modelError={modelError}
-          onTryFree={scrollToTool}
-        />
+        {/* Hero — clean, no model status props needed */}
+        <Hero onTryFree={scrollToTool} />
 
         {/* Ad slot — below hero, above tool */}
         <div className={styles.adWrap}>
@@ -116,7 +111,7 @@ export default function App() {
           />
         </div>
 
-        {/* Features — matches reference "Most popular features" section */}
+        {/* Features */}
         <FeaturesSection />
 
         {/* Ad slot — between features and how-it-works */}
@@ -143,6 +138,15 @@ export default function App() {
       </main>
 
       <Footer />
+
+      {/* Industry-standard non-blocking loading banner — Figma/Canva/VSCode style */}
+      <ModelLoadingBanner
+        state={state}
+        progress={progress}
+        device={device}
+        error={modelError}
+      />
+
       <Toast message={toast} onDone={() => setToast(null)} />
     </div>
   )

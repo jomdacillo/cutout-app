@@ -1,30 +1,26 @@
-import { ArrowRight, Users, Star } from 'lucide-react'
-import ModelStatus from './ModelStatus.jsx'
+import { ArrowRight, Star } from 'lucide-react'
 import styles from './Hero.module.css'
 
-export default function Hero({ state, progress, modelError, onTryFree }) {
+export default function Hero({ onTryFree }) {
   return (
     <section className={styles.heroWrap}>
-      {/* The big rounded gradient card — just like the reference */}
       <div className={styles.heroCard}>
-        {/* Mesh gradient blobs */}
         <div className={styles.blob1} />
         <div className={styles.blob2} />
         <div className={styles.blob3} />
 
         <div className={styles.heroContent}>
-          {/* Social proof pill — like "Currently Editing over 100,000 photos" in ref */}
+          {/* Social proof pill */}
           <div className={styles.socialPill}>
             <div className={styles.avatarStack}>
-              {['#0096c7','#0077b6','#00b4d8'].map((c,i) => (
-                <div key={i} className={styles.avatar} style={{ background: c, zIndex: 3-i }} />
+              {['#0096c7','#0077b6','#00b4d8'].map((c, i) => (
+                <div key={i} className={styles.avatar} style={{ background: c, zIndex: 3 - i }} />
               ))}
             </div>
             <span>Trusted by designers & sellers</span>
             <Star size={12} fill="currentColor" />
           </div>
 
-          {/* Headline */}
           <h1 className={styles.heroTitle}>
             Remove Backgrounds<br />
             <span className={styles.heroAccent}>with AI Magic</span>
@@ -35,7 +31,6 @@ export default function Hero({ state, progress, modelError, onTryFree }) {
             Full resolution PNG, zero account, zero cost — forever.
           </p>
 
-          {/* CTAs */}
           <div className={styles.heroCtas}>
             <button className={styles.primaryCta} onClick={onTryFree}>
               Remove Background Free
@@ -45,9 +40,6 @@ export default function Hero({ state, progress, modelError, onTryFree }) {
               See how it works
             </button>
           </div>
-
-          {/* Model status */}
-          <ModelStatus state={state} progress={progress} error={modelError} />
         </div>
       </div>
     </section>
