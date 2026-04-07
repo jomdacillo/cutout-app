@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
-import { applyMask } from '../utils/image.js'
 import RmbgWorker from '../worker/rmbg.worker.js?worker'
 
 export const MODEL_STATE = { IDLE:'idle', LOADING:'loading', READY:'ready', PROCESSING:'processing', ERROR:'error' }
@@ -7,7 +6,6 @@ export const MODEL_STATE = { IDLE:'idle', LOADING:'loading', READY:'ready', PROC
 export default function useRmbgWorker() {
   const workerRef   = useRef(null)
   const inflightRef = useRef({})
-  const dataUrlRef  = useRef(null)
 
   const [state,    setState]    = useState(MODEL_STATE.IDLE)
   const [progress, setProgress] = useState(0)
@@ -18,22 +16,33 @@ export default function useRmbgWorker() {
     const w = new RmbgWorker()
     workerRef.current = w
 
-    w.onmessage = async ({ data: msg }) => {
+    w.onmessage = ({ data: msg }) => {
       if (msg.type === 'progress') {
         setProgress(msg.pct)
+
       } else if (msg.type === 'ready') {
-        setState(MODEL_STATE.READY); setProgress(100); setDevice(msg.device)
-      } else if (msg.type === 'result') {
-        const { resolve } = inflightRef.current
-        inflightRef.current = {}
-        try {
-          const url = await applyMask(dataUrlRef.current, msg.mask)
-          resolve?.(url)
-        } catch (e) { inflightRef.current.reject?.(e) }
         setState(MODEL_STATE.READY)
+        setProgress(100)
+        setDevice(msg.device)
+
+      } else if (msg.type === 'result') {
+        // Worker sends back a finished PNG ArrayBuffer — just make a blob URL
+        // Zero pixel processing on the main thread — safe on mobile
+        const blob = new Blob([msg.pngBuf], { type: 'image/png' })
+        const url  = URL.createObjectURL(blob)
+        inflightRef.current.resolve?.(url)
+        inflightRef.current = {}
+        setState(MODEL_STATE.READY)
+
       } else if (msg.type === 'error') {
-        if (msg.fatal) { setState(MODEL_STATE.ERROR); setError(msg.message) }
-        else { inflightRef.current.reject?.(new Error(msg.message)); inflightRef.current = {}; setState(MODEL_STATE.READY) }
+        if (msg.fatal) {
+          setState(MODEL_STATE.ERROR)
+          setError(msg.message)
+        } else {
+          inflightRef.current.reject?.(new Error(msg.message))
+          inflightRef.current = {}
+          setState(MODEL_STATE.READY)
+        }
       }
     }
 
@@ -44,8 +53,10 @@ export default function useRmbgWorker() {
   }, [])
 
   const removeBackground = useCallback((imageDataUrl) => new Promise((resolve, reject) => {
-    if (!workerRef.current || state !== MODEL_STATE.READY) { reject(new Error('Not ready')); return }
-    dataUrlRef.current  = imageDataUrl
+    if (!workerRef.current || state !== MODEL_STATE.READY) {
+      reject(new Error('Not ready'))
+      return
+    }
     inflightRef.current = { resolve, reject }
     setState(MODEL_STATE.PROCESSING)
     workerRef.current.postMessage({ type: 'run', imageDataUrl })
@@ -59,3 +70,4 @@ export default function useRmbgWorker() {
     hasError:     state === MODEL_STATE.ERROR,
   }
 }
+

@@ -1,45 +1,75 @@
-/* ── Banner container ──────────────────────────────────────────────────────── */
+/* ══════════════════════════════════════════════════════════
+   MOBILE: slim top progress bar — YouTube / GitHub style
+   No fixed+transform, no floating card, no layout issues
+   ══════════════════════════════════════════════════════════ */
+.topBar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  z-index: 9999;
+  background: var(--border);
+  /* Only visible on mobile */
+  display: none;
+}
+
+.topBarFill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--bright-teal-blue), var(--turquoise-surf));
+  transition: width .5s var(--ease);
+}
+
+.topBarReady .topBarFill,
+.topBarFillReady {
+  background: var(--green);
+  transition: width .3s var(--ease);
+}
+
+.topBarError .topBarFill {
+  background: var(--red);
+  width: 100% !important;
+}
+
+/* Show top bar on mobile, hide floating banner */
+@media (max-width: 640px) {
+  .topBar   { display: block; }
+  .banner   { display: none !important; }
+}
+
+/* ══════════════════════════════════════════════════════════
+   DESKTOP: floating banner (Figma / VS Code style)
+   ══════════════════════════════════════════════════════════ */
 .banner {
-  /* Safe cross-browser fixed positioning — avoids iOS Safari transform bug */
   position: fixed;
   bottom: 24px;
   left: 16px;
   right: 16px;
   margin: 0 auto;
-  max-width: 560px;
+  max-width: 520px;
   z-index: 500;
-
-  /* Safe area inset for iPhone notch / home indicator */
-  bottom: calc(24px + env(safe-area-inset-bottom, 0px));
 
   display: flex;
   align-items: center;
   gap: 12px;
-
   padding: 13px 15px;
 
   background: var(--surface);
   border: 1px solid var(--border-2);
   border-radius: var(--r-xl);
-
-  /* Simplified shadow — no rgba double shadow (causes GPU crash on low-end Android) */
   box-shadow: 0 8px 28px rgba(0,0,0,.12);
 
   animation: slideUp .3s ease both;
   transition: border-color .4s, box-shadow .4s;
-
-  /* Prevent banner from causing horizontal scroll on mobile */
   box-sizing: border-box;
   overflow: hidden;
 }
 
 @keyframes slideUp {
-  /* Single transform axis — avoids iOS jitter with compound transforms */
   from { opacity: 0; transform: translateY(16px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
-/* ── State variants ────────────────────────────────────────────────────────── */
 .bannerReady {
   border-color: rgba(16,185,129,.35);
   box-shadow: 0 8px 28px rgba(16,185,129,.14);
@@ -50,7 +80,7 @@
   box-shadow: 0 8px 28px rgba(239,68,68,.12);
 }
 
-/* ── Icon ──────────────────────────────────────────────────────────────────── */
+/* ── Icon ─────────────────────────────────────────────── */
 .iconWrap {
   width: 34px;
   height: 34px;
@@ -81,7 +111,6 @@
   border: 2.5px solid rgba(0,150,199,.2);
   border-top-color: var(--blue-green);
   animation: spin .7s linear infinite;
-  /* Force GPU layer — smoother on mobile */
   will-change: transform;
 }
 
@@ -90,10 +119,10 @@
 .iconReady { color: var(--green); }
 .iconError { color: var(--red); }
 
-/* ── Body ──────────────────────────────────────────────────────────────────── */
+/* ── Body ─────────────────────────────────────────────── */
 .body {
   flex: 1;
-  min-width: 0; /* critical — prevents flex overflow on mobile */
+  min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -111,7 +140,6 @@
   font-size: 13px;
   font-weight: 600;
   color: var(--text);
-  /* No white-space: nowrap — was causing horizontal scroll on small screens */
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -133,14 +161,13 @@
   white-space: nowrap;
 }
 
-/* ── Progress track ────────────────────────────────────────────────────────── */
+/* ── Progress track ───────────────────────────────────── */
 .track {
   width: 100%;
   height: 4px;
   background: var(--border);
   border-radius: var(--r-pill);
   overflow: hidden;
-  /* Fixes border-radius+overflow clipping on iOS Safari */
   -webkit-mask-image: -webkit-radial-gradient(white, black);
 }
 
@@ -157,23 +184,16 @@
   transition: width .4s var(--ease);
 }
 
-/* ── Right side ────────────────────────────────────────────────────────────── */
+/* ── Right / dismiss ──────────────────────────────────── */
 .right {
   flex-shrink: 0;
   display: flex;
   align-items: center;
 }
 
-.cacheNote {
-  font-size: 11px;
-  color: var(--muted);
-  white-space: nowrap;
-  line-height: 1.4;
-}
-
 .dismiss {
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
   border-radius: 8px;
   background: none;
   border: 1px solid var(--border);
@@ -184,10 +204,6 @@
   cursor: pointer;
   transition: all var(--fast);
   font-family: var(--font);
-  /* Minimum tap target for mobile */
-  min-width: 44px;
-  min-height: 44px;
-  border-radius: var(--r-md);
 }
 .dismiss:hover {
   background: var(--surface-2);
@@ -195,27 +211,4 @@
   border-color: var(--border-2);
 }
 
-/* ── Mobile ────────────────────────────────────────────────────────────────── */
-@media (max-width: 480px) {
-  .banner {
-    left: 12px;
-    right: 12px;
-    bottom: calc(16px + env(safe-area-inset-bottom, 0px));
-    padding: 11px 12px;
-    gap: 10px;
-    border-radius: var(--r-lg);
-  }
-
-  /* Hide cache note on small screens to prevent overflow */
-  .cacheNote { display: none; }
-
-  .title { font-size: 12px; }
-  .sub   { display: none; }
-
-  .iconWrap {
-    width: 30px;
-    height: 30px;
-    border-radius: 8px;
-  }
-}
 
