@@ -26,7 +26,7 @@ const STEPS = [
   },
 ]
 
-/* ── Step demo panels ─────────────────────────────────────────────────────── */
+/* ── Demo panels — pure CSS animations, zero JS timers ─────────────────────── */
 function UploadDemo() {
   return (
     <div className={styles.demoUpload}>
@@ -98,55 +98,67 @@ const DEMOS = [UploadDemo, AIDemo, ResultDemo]
 
 /* ── Main component ───────────────────────────────────────────────────────── */
 export default function HowItWorks() {
-  const [current,  setCurrent]  = useState(0)
-  const [progress, setProgress] = useState(0)
+  const [current, setCurrent] = useState(0)
+  const sectionRef = useRef(null)
   const autoRef    = useRef(null)
-  const progressRef = useRef(null)
-  const startRef   = useRef(null)
+  const isVisible  = useRef(true)
 
   const goTo = useCallback((idx) => {
     const next = ((idx % STEPS.length) + STEPS.length) % STEPS.length
     setCurrent(next)
-    setProgress(0)
   }, [])
 
-  /* Auto-advance with smooth progress */
+  /* ── Auto-advance using setTimeout only — no setInterval, no state updates at 30fps ── */
   useEffect(() => {
     clearTimeout(autoRef.current)
-    clearInterval(progressRef.current)
 
-    const dur = STEPS[current].duration
-    startRef.current = Date.now()
-
-    progressRef.current = setInterval(() => {
-      const elapsed = Date.now() - startRef.current
-      setProgress(Math.min((elapsed / dur) * 100, 100))
-    }, 30)
+    // Don't run timers when section is off-screen (saves battery + prevents mobile crash)
+    if (!isVisible.current) return
 
     autoRef.current = setTimeout(() => {
       goTo(current + 1)
-    }, dur)
+    }, STEPS[current].duration)
 
-    return () => {
-      clearTimeout(autoRef.current)
-      clearInterval(progressRef.current)
-    }
+    return () => clearTimeout(autoRef.current)
+  }, [current, goTo])
+
+  /* ── Pause auto-advance when scrolled off screen ── */
+  useEffect(() => {
+    const el = sectionRef.current
+    if (!el || !('IntersectionObserver' in window)) return
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        isVisible.current = entry.isIntersecting
+        if (entry.isIntersecting) {
+          // Resume — restart timer for current step
+          clearTimeout(autoRef.current)
+          autoRef.current = setTimeout(() => goTo(current + 1), STEPS[current].duration)
+        } else {
+          clearTimeout(autoRef.current)
+        }
+      },
+      { threshold: 0.1 }
+    )
+
+    observer.observe(el)
+    return () => observer.disconnect()
   }, [current, goTo])
 
   const DemoPanel = DEMOS[current]
+  const dur = STEPS[current].duration
 
   return (
-    <section className={styles.section} id="how-it-works">
+    <section className={styles.section} id="how-it-works" ref={sectionRef}>
       <div className={styles.inner}>
 
-        {/* Header */}
         <div className={styles.head}>
           <span className={styles.tag}>Simple process</span>
           <h2 className={styles.title}>How ZeroBG works</h2>
           <p className={styles.sub}>Three steps. No account. No waiting. No server uploads.</p>
         </div>
 
-        {/* Step indicator cards */}
+        {/* Step indicator cards — progress bar driven by CSS animation, not JS state */}
         <div className={styles.stepCards}>
           {STEPS.map((s, i) => {
             const state = i < current ? 'done' : i === current ? 'active' : 'idle'
@@ -159,13 +171,17 @@ export default function HowItWorks() {
                 <div className={styles.stepCardIcon}>{s.icon}</div>
                 <div className={styles.stepCardNum}>{s.num}</div>
                 <div className={styles.stepCardTitle}>{s.title}</div>
-                {/* Progress bar fills bottom of active card */}
+                {/* CSS animation drives the bar — no JS timer touching the DOM at 30fps */}
                 <div
                   className={styles.stepCardBar}
-                  style={{
-                    width: state === 'active' ? `${progress}%` : state === 'done' ? '100%' : '0%',
+                  style={state === 'active' ? {
+                    animationName: styles.barFill,
+                    animationDuration: `${dur}ms`,
+                    animationTimingFunction: 'linear',
+                    animationFillMode: 'forwards',
+                  } : {
+                    width: state === 'done' ? '100%' : '0%',
                     background: state === 'done' ? 'var(--green)' : undefined,
-                    transition: state === 'active' ? 'none' : 'width .3s',
                   }}
                 />
               </button>
@@ -173,7 +189,7 @@ export default function HowItWorks() {
           })}
         </div>
 
-        {/* Demo panel + description */}
+        {/* Demo panel */}
         <div className={styles.demoWrap}>
           <div className={styles.demoPanel} key={current}>
             <DemoPanel />
@@ -185,14 +201,9 @@ export default function HowItWorks() {
             <p className={styles.demoBody}>{STEPS[current].body}</p>
 
             <div className={styles.demoControls}>
-              <button
-                className={styles.navBtn}
-                onClick={() => goTo(current - 1)}
-                aria-label="Previous step"
-              >
+              <button className={styles.navBtn} onClick={() => goTo(current - 1)} aria-label="Previous step">
                 <ChevronLeft size={16} />
               </button>
-
               <div className={styles.dots}>
                 {STEPS.map((_, i) => (
                   <button
@@ -203,12 +214,7 @@ export default function HowItWorks() {
                   />
                 ))}
               </div>
-
-              <button
-                className={styles.navBtn}
-                onClick={() => goTo(current + 1)}
-                aria-label="Next step"
-              >
+              <button className={styles.navBtn} onClick={() => goTo(current + 1)} aria-label="Next step">
                 <ChevronRight size={16} />
               </button>
             </div>

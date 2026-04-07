@@ -1,56 +1,60 @@
 /* ── Banner container ──────────────────────────────────────────────────────── */
 .banner {
+  /* Safe cross-browser fixed positioning — avoids iOS Safari transform bug */
   position: fixed;
   bottom: 24px;
-  left: 50%;
-  transform: translateX(-50%);
+  left: 16px;
+  right: 16px;
+  margin: 0 auto;
+  max-width: 560px;
   z-index: 500;
+
+  /* Safe area inset for iPhone notch / home indicator */
+  bottom: calc(24px + env(safe-area-inset-bottom, 0px));
 
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 12px;
 
-  width: min(560px, calc(100vw - 32px));
-  padding: 14px 16px;
+  padding: 13px 15px;
 
   background: var(--surface);
   border: 1px solid var(--border-2);
   border-radius: var(--r-xl);
-  box-shadow:
-    0 4px 6px rgba(0,0,0,.04),
-    0 10px 32px rgba(0,0,0,.1);
 
-  animation: slideUp .35s cubic-bezier(.34,1.3,.64,1) both;
-  transition:
-    border-color .4s var(--ease),
-    box-shadow   .4s var(--ease);
+  /* Simplified shadow — no rgba double shadow (causes GPU crash on low-end Android) */
+  box-shadow: 0 8px 28px rgba(0,0,0,.12);
+
+  animation: slideUp .3s ease both;
+  transition: border-color .4s, box-shadow .4s;
+
+  /* Prevent banner from causing horizontal scroll on mobile */
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 @keyframes slideUp {
-  from { opacity: 0; transform: translateX(-50%) translateY(18px); }
-  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+  /* Single transform axis — avoids iOS jitter with compound transforms */
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 /* ── State variants ────────────────────────────────────────────────────────── */
 .bannerReady {
   border-color: rgba(16,185,129,.35);
-  box-shadow:
-    0 4px 6px rgba(0,0,0,.04),
-    0 10px 32px rgba(16,185,129,.12);
+  box-shadow: 0 8px 28px rgba(16,185,129,.14);
 }
 
 .bannerError {
   border-color: rgba(239,68,68,.3);
-  box-shadow:
-    0 4px 6px rgba(0,0,0,.04),
-    0 10px 32px rgba(239,68,68,.1);
+  box-shadow: 0 8px 28px rgba(239,68,68,.12);
 }
 
 /* ── Icon ──────────────────────────────────────────────────────────────────── */
 .iconWrap {
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
   background: rgba(0,150,199,.08);
   border: 1px solid rgba(0,150,199,.18);
   display: flex;
@@ -71,12 +75,14 @@
 }
 
 .spinner {
-  width: 18px;
-  height: 18px;
+  width: 17px;
+  height: 17px;
   border-radius: 50%;
   border: 2.5px solid rgba(0,150,199,.2);
   border-top-color: var(--blue-green);
   animation: spin .7s linear infinite;
+  /* Force GPU layer — smoother on mobile */
+  will-change: transform;
 }
 
 @keyframes spin { to { transform: rotate(360deg); } }
@@ -87,35 +93,44 @@
 /* ── Body ──────────────────────────────────────────────────────────────────── */
 .body {
   flex: 1;
-  min-width: 0;
+  min-width: 0; /* critical — prevents flex overflow on mobile */
   display: flex;
   flex-direction: column;
-  gap: 7px;
+  gap: 6px;
+  overflow: hidden;
 }
 
 .textRow {
   display: flex;
   align-items: baseline;
-  gap: 8px;
-  flex-wrap: wrap;
+  gap: 6px;
+  min-width: 0;
 }
 
 .title {
   font-size: 13px;
   font-weight: 600;
   color: var(--text);
+  /* No white-space: nowrap — was causing horizontal scroll on small screens */
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
+  min-width: 0;
+  flex-shrink: 1;
 }
 
 .sub {
   font-size: 11px;
   color: var(--muted);
   font-weight: 400;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .subError {
   font-size: 11px;
   color: var(--red);
+  white-space: nowrap;
 }
 
 /* ── Progress track ────────────────────────────────────────────────────────── */
@@ -125,18 +140,21 @@
   background: var(--border);
   border-radius: var(--r-pill);
   overflow: hidden;
+  /* Fixes border-radius+overflow clipping on iOS Safari */
+  -webkit-mask-image: -webkit-radial-gradient(white, black);
 }
 
 .fill {
   height: 100%;
   border-radius: var(--r-pill);
   background: linear-gradient(90deg, var(--bright-teal-blue), var(--turquoise-surf));
-  transition: width .6s var(--ease);
+  transition: width .5s var(--ease);
+  will-change: width;
 }
 
 .fillReady {
   background: linear-gradient(90deg, var(--green), #22c55e);
-  transition: width .4s var(--ease), background .4s;
+  transition: width .4s var(--ease);
 }
 
 /* ── Right side ────────────────────────────────────────────────────────────── */
@@ -150,7 +168,6 @@
   font-size: 11px;
   color: var(--muted);
   white-space: nowrap;
-  text-align: right;
   line-height: 1.4;
 }
 
@@ -167,6 +184,10 @@
   cursor: pointer;
   transition: all var(--fast);
   font-family: var(--font);
+  /* Minimum tap target for mobile */
+  min-width: 44px;
+  min-height: 44px;
+  border-radius: var(--r-md);
 }
 .dismiss:hover {
   background: var(--surface-2);
@@ -174,13 +195,27 @@
   border-color: var(--border-2);
 }
 
-/* ── Responsive ────────────────────────────────────────────────────────────── */
+/* ── Mobile ────────────────────────────────────────────────────────────────── */
 @media (max-width: 480px) {
   .banner {
-    bottom: 16px;
-    padding: 12px 14px;
+    left: 12px;
+    right: 12px;
+    bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+    padding: 11px 12px;
     gap: 10px;
+    border-radius: var(--r-lg);
   }
+
+  /* Hide cache note on small screens to prevent overflow */
   .cacheNote { display: none; }
+
   .title { font-size: 12px; }
+  .sub   { display: none; }
+
+  .iconWrap {
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+  }
 }
+

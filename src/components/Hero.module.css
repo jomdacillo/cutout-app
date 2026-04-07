@@ -4,7 +4,7 @@
   margin: 0 auto;
 }
 
-/* The big gradient card — key design element from reference */
+/* The big gradient card */
 .heroCard {
   position: relative;
   border-radius: 28px;
@@ -22,30 +22,45 @@
   align-items: center;
   justify-content: center;
   text-align: center;
+  /* Contain GPU layers to this card only */
+  isolation: isolate;
 }
 
-/* Mesh gradient blobs inside the card */
+/* Blobs — use will-change to promote to own layer, preventing repaint cascade */
 .blob1, .blob2, .blob3 {
   position: absolute;
   border-radius: 50%;
-  filter: blur(60px);
   pointer-events: none;
+  /* will-change isolates GPU compositing — no longer affects siblings */
+  will-change: transform;
 }
 .blob1 {
   width: 400px; height: 350px;
-  background: radial-gradient(ellipse, rgba(0,182,216,.35) 0%, transparent 70%);
+  background: radial-gradient(ellipse, rgba(0,182,216,.5) 0%, transparent 70%);
   top: -80px; left: -60px;
+  /* opacity blur is cheaper than filter: blur() on mobile */
+  opacity: .55;
+  filter: blur(55px);
 }
 .blob2 {
   width: 350px; height: 300px;
-  background: radial-gradient(ellipse, rgba(72,202,228,.3) 0%, transparent 70%);
+  background: radial-gradient(ellipse, rgba(72,202,228,.45) 0%, transparent 70%);
   bottom: -60px; right: -40px;
+  opacity: .5;
+  filter: blur(50px);
 }
 .blob3 {
   width: 300px; height: 250px;
-  background: radial-gradient(ellipse, rgba(0,150,199,.2) 0%, transparent 70%);
+  background: radial-gradient(ellipse, rgba(0,150,199,.35) 0%, transparent 70%);
   top: 50%; left: 50%;
   transform: translate(-50%, -50%);
+  opacity: .4;
+  filter: blur(45px);
+}
+
+/* On low-power mobile — kill blobs entirely, gradient alone is fine */
+@media (max-width: 480px) {
+  .blob1, .blob2, .blob3 { display: none; }
 }
 
 .heroContent {
