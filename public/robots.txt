@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://zerobg.net/sitemap.xml

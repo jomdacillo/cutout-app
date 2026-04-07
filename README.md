@@ -1,101 +1,31 @@
-# Cutout — AI Background Remover
+# ZeroBG — Free AI Background Remover
 
-A production-ready React app that removes image backgrounds entirely in the browser using the **RMBG-1.4** AI model by BRIA AI — no API key, no uploads, completely free.
+> zerobg.net · Free, private, full-resolution AI background removal in your browser.
 
-## ✦ Features
+## Stack
+React 18 · Vite 5 · CSS Modules · Lucide React · Web Workers · WebGPU
 
-- **100% client-side** — images never leave your device
-- **Real AI** — RMBG-1.4 (state-of-the-art segmentation model)
-- **WebGPU accelerated** — falls back to WebAssembly automatically
-- **Drag & drop** upload
-- **Download transparent PNG** or copy to clipboard
-- **Zero cost** — no API key, no account required
-
-## Tech Stack
-
-| Layer | Tech |
-|-------|------|
-| Framework | React 18 + Vite |
-| AI Model | RMBG-1.4 via `@huggingface/transformers` |
-| Inference | WebGPU (fp16) → WASM (fp32) fallback |
-| Styling | CSS Modules + CSS Custom Properties |
-| Worker | Native Web Worker (ES module) |
-
-## Getting Started
-
-### Prerequisites
-
-- Node.js 18+ 
-- npm 9+
-
-### Install & Run
-
+## Setup
 ```bash
-# Install dependencies
 npm install
-
-# Start dev server
+cp .env.example .env
 npm run dev
 ```
 
-Open [http://localhost:5173](http://localhost:5173) in your browser.
+## Deploy (Render)
+1. Push to GitHub (`jomdacillo/cutout-app`)
+2. Render → New → Static Site
+3. Build command: `npm run build`
+4. Publish directory: `dist`
 
-> **Note:** On first load, the app downloads the RMBG-1.4 model (~170 MB) from Hugging Face. This is cached by your browser for subsequent visits.
+## Custom Domain (Cloudflare + Onamae.com)
+1. Onamae.com → set nameservers to `ns1.cloudflare.com` + `ns2.cloudflare.com`
+2. Cloudflare → Add site → zerobg.net → Add CNAME pointing to your `.onrender.com` URL
+3. Render → Settings → Custom Domains → add `zerobg.net`
 
-### Build for Production
-
-```bash
-npm run build
-npm run preview
-```
-
-## Project Structure
-
-```
-cutout-app/
-├── index.html
-├── vite.config.js
-├── package.json
-├── public/
-│   └── favicon.svg
-└── src/
-    ├── main.jsx              # Entry point
-    ├── App.jsx               # Root component
-    ├── App.module.css
-    ├── styles/
-    │   └── global.css        # CSS variables & resets
-    ├── hooks/
-    │   └── useRmbgWorker.js  # Worker lifecycle hook
-    ├── worker/
-    │   └── rmbg.worker.js    # Web Worker (AI inference)
-    ├── utils/
-    │   └── image.js          # Image utilities
-    └── components/
-        ├── Header.jsx / .module.css
-        ├── ModelStatus.jsx / .module.css
-        ├── DropZone.jsx / .module.css
-        ├── ResultPanel.jsx / .module.css
-        ├── ActionBar.jsx / .module.css
-        ├── InfoBar.jsx / .module.css
-        └── Toast.jsx / .module.css
-```
-
-## Browser Support
-
-| Browser | WebGPU | WASM Fallback |
-|---------|--------|---------------|
-| Chrome 113+ | ✅ | ✅ |
-| Edge 113+ | ✅ | ✅ |
-| Firefox | ❌ | ✅ |
-| Safari 18+ | ✅ | ✅ |
-
-## Model Info
-
-- **Model:** [briaai/RMBG-1.4](https://huggingface.co/briaai/RMBG-1.4)
-- **Task:** Image segmentation / background removal
-- **Size:** ~170 MB (downloaded once, cached)
-- **License:** [bria-rmbg-1.4](https://huggingface.co/briaai/RMBG-1.4/blob/main/LICENSE)
-
-## License
-
-MIT
+## Enable AdSense
+1. Get approved at adsense.google.com
+2. Uncomment the AdSense script in `index.html`
+3. Set `VITE_ADSENSE_CLIENT=ca-pub-XXXXXXXXXXXXXXXX` in `.env`
+4. Set `approved={true}` on each `<AdSlot />` in `App.jsx`
+5. Replace slot IDs with your real ad unit IDs from AdSense dashboard

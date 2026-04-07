@@ -1,0 +1,20 @@
+.wrap { width: 100%; min-height: 90px; }
+
+.placeholder {
+  width: 100%;
+  min-height: 90px;
+  background: var(--surface-2);
+  border: 1px dashed var(--border);
+  border-radius: var(--r-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.label {
+  font-size: 11px;
+  color: var(--border-2);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  font-weight: 500;
+}

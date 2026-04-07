@@ -9,17 +9,12 @@ export default defineConfig({
       external: ['@huggingface/transformers'],
     },
   },
-  build: {
-    rollupOptions: {
-      external: [],
-    },
-  },
   optimizeDeps: {
     exclude: ['@huggingface/transformers'],
   },
   server: {
+    historyApiFallback: true,
     headers: {
-      // Required for SharedArrayBuffer / WebGPU in some browsers
       'Cross-Origin-Opener-Policy': 'same-origin',
       'Cross-Origin-Embedder-Policy': 'require-corp',
     },

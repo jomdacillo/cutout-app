@@ -1,41 +1,36 @@
+import { Cpu, CheckCircle, AlertCircle, Loader } from 'lucide-react'
 import { MODEL_STATE } from '../hooks/useRmbgWorker'
 import styles from './ModelStatus.module.css'
 
-const MESSAGES = {
-  [MODEL_STATE.IDLE]:       { text: 'Initialising…',              cls: 'loading' },
-  [MODEL_STATE.LOADING]:    { text: null,                          cls: 'loading' },
-  [MODEL_STATE.READY]:      { text: '✦ AI model ready',           cls: 'ready'   },
-  [MODEL_STATE.PROCESSING]: { text: '⚙ Running inference…',      cls: 'loading' },
-  [MODEL_STATE.ERROR]:      { text: '⚠ Model failed to load',    cls: 'error'   },
-}
+export default function ModelStatus({ state, progress, error }) {
+  const isLoading    = state === MODEL_STATE.LOADING || state === MODEL_STATE.IDLE
+  const isReady      = state === MODEL_STATE.READY
+  const isProcessing = state === MODEL_STATE.PROCESSING
+  const isError      = state === MODEL_STATE.ERROR
 
-export default function ModelStatus({ modelState, modelProgress, modelError }) {
-  const info = MESSAGES[modelState] ?? MESSAGES[MODEL_STATE.IDLE]
+  const icon = isReady      ? <CheckCircle size={14} />
+             : isError      ? <AlertCircle size={14} />
+             : isProcessing ? <Loader size={14} className={styles.spin} />
+             :                <Loader size={14} className={styles.spin} />
 
-  const label =
-    modelState === MODEL_STATE.LOADING
-      ? modelProgress < 5
-        ? '⬇ Downloading AI model…'
-        : `⬇ Downloading model… ${modelProgress}%`
-      : info.text
+  const label = isError      ? 'Model failed to load'
+    : isReady      ? 'AI model ready — runs 100% in your browser'
+    : isProcessing ? 'Processing your image…'
+    : progress < 5 ? 'Initialising AI model…'
+    :                `Downloading model… ${progress}%`
+
+  const cls = isReady ? styles.ready : isError ? styles.error : styles.loading
 
   return (
     <div className={styles.wrap}>
-      <div className={`${styles.pill} ${styles[info.cls]}`}>
-        {label}
+      <div className={`${styles.pill} ${cls}`}>
+        {icon}
+        <span>{label}</span>
       </div>
-
-      {modelState === MODEL_STATE.LOADING && (
-        <div className={styles.progressWrap} aria-label={`Download progress: ${modelProgress}%`}>
-          <div
-            className={styles.progressFill}
-            style={{ width: `${modelProgress}%` }}
-          />
+      {isLoading && (
+        <div className={styles.barWrap} role="progressbar" aria-valuenow={progress}>
+          <div className={styles.barFill} style={{ width: `${progress}%` }} />
         </div>
-      )}
-
-      {modelState === MODEL_STATE.ERROR && modelError && (
-        <p className={styles.errorNote}>{modelError}</p>
       )}
     </div>
   )

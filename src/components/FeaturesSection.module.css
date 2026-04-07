@@ -1,0 +1,134 @@
+.section {
+  padding: 80px 32px 0;
+}
+
+.inner {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* ── Section header — matches reference "Most popular features" layout ── */
+.head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 32px;
+  margin-bottom: 40px;
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--blue-green);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-pill);
+  padding: 6px 14px;
+  white-space: nowrap;
+  align-self: flex-start;
+  margin-top: 4px;
+}
+
+.headRight {
+  flex: 1;
+}
+
+.title {
+  font-size: clamp(26px, 4vw, 38px);
+  font-weight: 800;
+  letter-spacing: -.8px;
+  color: var(--text);
+  margin-bottom: 10px;
+}
+
+.sub {
+  font-size: 15px;
+  color: var(--muted);
+  max-width: 480px;
+  line-height: 1.6;
+  margin-bottom: 16px;
+}
+
+.viewAll {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--blue-green);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: gap var(--fast);
+}
+.viewAll:hover { gap: 8px; }
+
+/* ── Cards grid — 4 columns like reference ── */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+@media (max-width: 900px) { .grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 560px) {
+  .grid { grid-template-columns: 1fr; }
+  .head { flex-direction: column; gap: 16px; }
+  .section { padding: 60px 16px 0; }
+}
+
+/* ── Card ── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-xl);
+  padding: 28px 24px;
+  transition: all var(--base) var(--ease);
+  box-shadow: 0 1px 3px rgba(0,100,180,.05);
+}
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(0,100,180,.1);
+  border-color: var(--border-2);
+}
+
+.card_blue { background: linear-gradient(135deg, #fff 60%, rgba(202,240,248,.4)); }
+.card_teal { background: linear-gradient(135deg, #fff 60%, rgba(173,232,244,.3)); }
+
+/* ── Icon ── */
+.cardIcon {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--r-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 18px;
+}
+
+.icon_blue {
+  background: linear-gradient(135deg, rgba(0,150,199,.12), rgba(0,119,182,.08));
+  color: var(--blue-green);
+  border: 1px solid rgba(0,150,199,.2);
+}
+
+.icon_teal {
+  background: linear-gradient(135deg, rgba(0,180,216,.12), rgba(72,202,228,.08));
+  color: var(--turquoise-surf);
+  border: 1px solid rgba(0,180,216,.2);
+}
+
+.cardTitle {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 10px;
+  letter-spacing: -.2px;
+}
+
+.cardBody {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.65;
+}

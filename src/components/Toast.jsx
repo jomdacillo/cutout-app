@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { CheckCircle } from 'lucide-react'
 import styles from './Toast.module.css'
 
 export default function Toast({ message, onDone }) {
@@ -9,9 +10,9 @@ export default function Toast({ message, onDone }) {
   }, [message, onDone])
 
   if (!message) return null
-
   return (
-    <div className={styles.toast}>
+    <div className={styles.toast} role="status">
+      <CheckCircle size={15} />
       {message}
     </div>
   )

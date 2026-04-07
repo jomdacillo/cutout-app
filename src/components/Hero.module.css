@@ -1,0 +1,159 @@
+.heroWrap {
+  padding: 32px 32px 0;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* The big gradient card — key design element from reference */
+.heroCard {
+  position: relative;
+  border-radius: 28px;
+  overflow: hidden;
+  padding: 80px 40px 72px;
+  background: linear-gradient(160deg,
+    rgba(202,240,248,.9) 0%,
+    rgba(173,232,244,.7) 25%,
+    rgba(144,224,239,.6) 50%,
+    rgba(0,180,216,.15) 75%,
+    rgba(0,150,199,.2) 100%
+  );
+  min-height: 460px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+/* Mesh gradient blobs inside the card */
+.blob1, .blob2, .blob3 {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  pointer-events: none;
+}
+.blob1 {
+  width: 400px; height: 350px;
+  background: radial-gradient(ellipse, rgba(0,182,216,.35) 0%, transparent 70%);
+  top: -80px; left: -60px;
+}
+.blob2 {
+  width: 350px; height: 300px;
+  background: radial-gradient(ellipse, rgba(72,202,228,.3) 0%, transparent 70%);
+  bottom: -60px; right: -40px;
+}
+.blob3 {
+  width: 300px; height: 250px;
+  background: radial-gradient(ellipse, rgba(0,150,199,.2) 0%, transparent 70%);
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.heroContent {
+  position: relative;
+  z-index: 2;
+  max-width: 680px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  animation: fadeUp .6s var(--ease) both;
+}
+
+/* Social pill */
+.socialPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255,255,255,.7);
+  border: 1px solid rgba(255,255,255,.9);
+  border-radius: var(--r-pill);
+  padding: 7px 16px 7px 10px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--bright-teal-blue);
+  backdrop-filter: blur(8px);
+}
+
+.avatarStack {
+  display: flex;
+}
+.avatar {
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  border: 2px solid white;
+  margin-right: -6px;
+  flex-shrink: 0;
+}
+.avatarStack .avatar:last-child { margin-right: 0; }
+
+/* Headline */
+.heroTitle {
+  font-size: clamp(36px, 6vw, 64px);
+  font-weight: 900;
+  letter-spacing: -2px;
+  line-height: 1.0;
+  color: var(--deep-twilight);
+}
+
+.heroAccent {
+  color: var(--blue-green);
+  display: block;
+}
+
+.heroSub {
+  font-size: 17px;
+  font-weight: 400;
+  color: var(--french-blue);
+  line-height: 1.65;
+  max-width: 520px;
+  opacity: .85;
+}
+
+/* CTAs */
+.heroCtas {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.primaryCta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 28px;
+  border-radius: var(--r-pill);
+  background: linear-gradient(135deg, var(--blue-green), var(--bright-teal-blue));
+  color: white;
+  font-size: 15px;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(0,150,199,.4);
+  transition: all var(--fast) var(--ease);
+}
+.primaryCta:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0,150,199,.5); }
+.primaryCta:active { transform: none; }
+
+.secondaryCta {
+  padding: 14px 24px;
+  border-radius: var(--r-pill);
+  background: rgba(255,255,255,.65);
+  color: var(--french-blue);
+  font-size: 15px;
+  font-weight: 600;
+  border: 1px solid rgba(255,255,255,.9);
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  transition: all var(--fast) var(--ease);
+}
+.secondaryCta:hover { background: rgba(255,255,255,.85); }
+
+@media (max-width: 640px) {
+  .heroWrap { padding: 16px 16px 0; }
+  .heroCard { padding: 56px 24px 48px; }
+  .heroTitle { letter-spacing: -1.5px; }
+  .heroCtas { flex-direction: column; width: 100%; }
+  .primaryCta, .secondaryCta { width: 100%; justify-content: center; }
+}
